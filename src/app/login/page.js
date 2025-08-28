@@ -22,10 +22,10 @@ export default function LoginPage() {
             localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
 
             // redirigir según el rol
-            if (res.data.usuario.rol === "admin") {
+            if (res.data.usuario.rol === "user") {
                 router.push("/dashboard/admin");
             } else {
-                router.push("/dashboard/user");
+                router.push("/dashboard/usuario");
             }
         } catch (err) {
             setError(err.message || "Error en inicio de sesión");

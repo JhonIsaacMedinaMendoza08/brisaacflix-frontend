@@ -30,7 +30,7 @@ export default function Header() {
                     <Link href="/categorias" className="hover:text-white">Categorías</Link>
                 </nav>
 
-                {/* Barra de búsqueda (desktop) */}
+                {/* Barra de búsqueda (desktop)
                 <form
                     onSubmit={handleSearch}
                     className="hidden md:flex items-center bg-gray-800 rounded-md overflow-hidden"
@@ -48,7 +48,7 @@ export default function Header() {
                     >
                         Buscar
                     </button>
-                </form>
+                </form> */}
 
                 {/* Botón login (desktop) */}
                 <div className="hidden md:block">
