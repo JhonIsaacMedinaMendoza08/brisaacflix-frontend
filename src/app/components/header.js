@@ -57,7 +57,7 @@ export default function Header() {
                     )}
                     {usuario?.rol === "user" && (
                         <Link
-                            href="/crear-contenido"
+                            href="/configuracion"
                             className="hover:text-white font-semibold text-blue-400"
                         >
                             Configuracion
