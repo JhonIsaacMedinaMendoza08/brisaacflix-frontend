@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +8,7 @@ export default function HomePage() {
   const [contenidos, setContenidos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const scrollRef = useRef(null);
+
 
   useEffect(() => {
     const fetchData = async () => {

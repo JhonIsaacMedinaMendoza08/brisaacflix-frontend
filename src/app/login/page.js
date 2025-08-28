@@ -22,6 +22,7 @@ export default function LoginPage() {
             localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
 
             // redirigir según el rol
+          
             if (res.data.usuario.rol === "user") {
                 router.push("/");
             } else {
