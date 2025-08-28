@@ -6,8 +6,10 @@ import Image from "next/image";
 export default function ContenidoDetalle() {
     const { id } = useParams();
     const [contenido, setContenido] = useState(null);
+    const [resenas, setResenas] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // 🔹 Obtener detalle del contenido
     useEffect(() => {
         const fetchContenido = async () => {
             try {
@@ -22,6 +24,26 @@ export default function ContenidoDetalle() {
         };
 
         if (id) fetchContenido();
+    }, [id]);
+
+    // 🔹 Obtener reseñas del contenido
+    useEffect(() => {
+        const fetchResenas = async () => {
+            try {
+                const res = await fetch(`http://localhost:4000/api/v1/resenias`);
+                const data = await res.json();
+
+                // Filtrar solo reseñas de este contenido
+                const filtradas = data.data.filter(
+                    (r) => r.contenidoId === id // asegúrate que el campo se llame contenidoId
+                );
+                setResenas(filtradas);
+            } catch (error) {
+                console.error("Error cargando reseñas:", error);
+            }
+        };
+
+        if (id) fetchResenas();
     }, [id]);
 
     if (loading) {
@@ -111,14 +133,54 @@ export default function ContenidoDetalle() {
                             </p>
                         </div>
 
-                        {/* Botones de acción */}
+                        {/* Botón para escribir reseña */}
                         <div className="mt-6 flex gap-4">
                             <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
-                                + Escribir una resena
+                                + Escribir una reseña
                             </button>
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* Reseñas */}
+            <section className="max-w-6xl mx-auto px-6 md:px-12 py-12">
+                <h2 className="text-2xl font-semibold mb-6">Reseñas de usuarios</h2>
+
+                {resenas.length === 0 ? (
+                    <p className="text-gray-400">
+                        No hay reseñas todavía. ¡Sé el primero en opinar!
+                    </p>
+                ) : (
+                    <div className="space-y-6">
+                        {resenas.map((r) => (
+                            <div
+                                key={r._id}
+                                className="bg-gray-800 p-5 rounded-lg shadow-md hover:bg-gray-700 transition"
+                            >
+                                {/* Cabecera reseña */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-semibold text-lg">{r.titulo}</h3>
+                                    <span className="text-yellow-400 font-bold">
+                                        ⭐ {r.calificacion}/10
+                                    </span>
+                                </div>
+
+                                {/* Comentario */}
+                                <p className="text-gray-300 mb-3">{r.comentario}</p>
+
+                                {/* Info extra */}
+                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                    <span>Publicado: {new Date(r.createdAt).toLocaleDateString()}</span>
+                                    <div className="flex gap-4">
+                                        <span>👍 {r.likesUsuarios?.length || 0}</span>
+                                        <span>👎 {r.dislikesUsuarios?.length || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </section>
         </main>
     );
