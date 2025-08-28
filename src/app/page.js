@@ -1,70 +1,105 @@
 "use client";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { apiRequest } from "@/lib/api";
+export default function HomePage() {
+  const [contenidos, setContenidos] = useState([]);
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/v1/contenido");
+        const data = await res.json();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+        // Filtrar solo aprobados
+        const aprobados = Array.isArray(data)
+          ? data.filter((item) => item.estado === "aprobado")
+          : [];
 
-    try {
-      const res = await apiRequest("/login", "POST", { email, contrasena });
-
-      // guardar token y usuario en localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
-
-      // redirigir según el rol
-      if (res.data.usuario.rol === "admin") {
-        router.push("/dashboard/admin");
-      } else {
-        router.push("/dashboard/user");
+        setContenidos(aprobados);
+      } catch (error) {
+        console.error("Error cargando contenidos:", error);
       }
-    } catch (err) {
-      setError(err.message || "Error en inicio de sesión");
-    }
-  };
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="bg-red-800 p-8 rounded-2xl shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-red text-center mb-6">Iniciar sesión</h2>
-        {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+    <main className="min-h-screen bg-gray-900 text-white">
+      {/* Hero Banner */}
+      <section className="relative h-[500px] flex items-center justify-center">
+        <Image
+          src="/fondo-inicio.webp"
+          alt="Banner"
+          fill
+          className="object-cover brightness-50"
+          priority
+        />
+        <div className="relative z-10 text-center max-w-2xl px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Bienvenido a BrisaacFlix
+          </h1>
+          <p className="text-lg text-gray-300 mb-6">
+            Millones de películas, series y contenido por descubrir. ¡Explora ya!
+          </p>
+          <div className="flex justify-center " >
+            <input
+              type="text"
+              placeholder="Buscar una película, serie..."
+              className="px-4 py-2 rounded-l-md text-white w-64 bg-gray-700 focus:outline-none"
+            />
+            <button className="bg-blue-600 px-4 py-2 rounded-r-md hover:bg-blue-700">
+              Buscar
+            </button>
+          </div>
+        </div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-300">Correo</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-            />
+      {/* Tendencias */}
+      <section className="px-8 py-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold">Tendencias</h2>
+          <div className="flex gap-2">
+            <span className="bg-blue-600 px-3 py-1 rounded-full text-sm cursor-pointer">
+              Hoy
+            </span>
+            <span className="bg-gray-700 px-3 py-1 rounded-full text-sm cursor-pointer">
+              Esta semana
+            </span>
           </div>
-          <div>
-            <label className="block text-gray-300">Contraseña</label>
-            <input
-              type="password"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
-          >
-            Ingresar
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+          {contenidos.length === 0 ? (
+            <p>No hay contenidos disponibles</p>
+          ) : (
+            contenidos.map((item) => (
+              <div
+                key={item.tmdbId}
+                className="min-w-[180px] bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform"
+              >
+                <div className="relative w-full h-[270px]">
+                  <Image
+                    src={item.poster}
+                    alt={item.titulo}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-lg font-semibold truncate">
+                    {item.titulo}
+                  </h3>
+                  <p className="text-sm text-gray-400">{item.anio}</p>
+                  <p className="text-xs text-green-400 capitalize mt-1">
+                    {item.estado}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+    </main>
   );
 }
