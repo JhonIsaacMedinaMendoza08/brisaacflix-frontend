@@ -29,7 +29,6 @@ export default function Header() {
         e.preventDefault();
         if (query.trim() === "") return;
         console.log("Buscando:", query);
-        // 🔹 Aquí luego conectas con tu backend o TMDB API
     };
 
     return (
@@ -127,11 +126,35 @@ export default function Header() {
                         {usuario?.rol === "user" && (
                             <Link
                                 href="/crear-contenido"
-                                className="hover:text-white font-semibold text-green-400"
+                                className="hover:text-white font-semibold text-blue-400"
                             >
-                                + Crear contenido
+                                Crear contenido
                             </Link>
                         )}
+                        {usuario?.rol === "user" && (
+                        <Link
+                            href="/crear-contenido"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Configuracion
+                        </Link>
+                    )}
+                    {usuario?.rol === "admin" && (
+                        <Link
+                            href="/gestion-usuarios"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Gestion de usuarios
+                        </Link>
+                    )}
+                    {usuario?.rol === "admin" && (
+                        <Link
+                            href="/gestion-contenido"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Gestion de contenido
+                        </Link>
+                    )}
                     </nav>
 
 

@@ -3,48 +3,52 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function PopularesPage() {
-    const [populares, setPopulares] = useState([]);
+export default function SeriesPage() {
+    const [series, setSeries] = useState([]);
 
     useEffect(() => {
-        const fetchPopulares = async () => {
+        const fetchSeries = async () => {
             try {
-                const res = await fetch("http://localhost:4000/api/v1/contenido/populares");
+                const res = await fetch("http://localhost:4000/api/v1/contenido");
                 const data = await res.json();
 
-                // Aseguramos que venga como array
+                // 🔹 Filtrar SOLO películas aprobadas
                 const dataAPI = Array.isArray(data.data) ? data.data : [];
-                setPopulares(dataAPI);
+                const soloSeries = dataAPI.filter(
+                    (item) => item.tipo === "serie" && item.estado === "aprobado"
+                );
+
+                setSeries(soloSeries);
             } catch (error) {
-                console.error("Error cargando populares:", error);
+                console.error("Error cargando Series:", error);
             }
         };
 
-        fetchPopulares();
+        fetchSeries();
     }, []);
 
     return (
         <main className="min-h-screen bg-gray-950 text-white px-6 sm:px-10 py-10">
             {/* Título */}
             <h1 className="text-4xl font-extrabold mb-10 text-center">
-                🔥 Ranking de <span className="text-blue-500">Populares</span>
+                🎬 Catálogo de <span className="text-blue-500">Series</span>
             </h1>
 
-            {/* Contenidos Populares */}
-            {populares.length === 0 ? (
+            {/* Series */}
+            {series.length === 0 ? (
                 <p className="text-center text-gray-400">
-                    No hay contenidos populares disponibles 😢
+                    No hay Series disponibles por ahora 😢
                 </p>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
-                    {populares.map((item, index) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                    {series.map((item) => (
                         <Link
                             key={item._id}
-                            href={`/contenido/${item._id}`} // Redirige al detalle
+                            href={`/contenido/${item._id}`} // 🔹 Redirige al detalle
                             className="group relative bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300"
                         >
-                            {/* Poster con ranking */}
-                            <div className="relative w-full h-[350px]">
+                            {/* Poster con efecto */}
+                            <div className="relative w-full h-[400px]">
                                 <Image
                                     src={item.poster}
                                     alt={item.titulo}
@@ -52,11 +56,7 @@ export default function PopularesPage() {
                                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
                                 {/* Overlay degradado */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-70 group-hover:opacity-90 transition"></div>
-                                {/* Badge Ranking */}
-                                <span className="absolute top-2 left-2 bg-blue-600 text-white font-bold px-3 py-1 rounded-lg shadow-md">
-                                    #{index + 1}
-                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition"></div>
                             </div>
 
                             {/* Info */}
@@ -67,7 +67,7 @@ export default function PopularesPage() {
                                 <div className="flex justify-between items-center text-sm mt-1 text-gray-300">
                                     <span>{item.anio}</span>
                                     <span className="text-yellow-400 font-semibold">
-                                        ⭐ {item.ratingAvg?.toFixed(1) ?? "N/A"}
+                                        ⭐ {item.ratingAvg ?? "N/A"}
                                     </span>
                                 </div>
                             </div>

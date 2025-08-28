@@ -16,9 +16,11 @@ export default function HomePage() {
 
         const contenidosAPI = Array.isArray(data.data) ? data.data : [];
 
-        const aprobados = contenidosAPI.filter(
-          (item) => item.estado === "aprobado"
-        );
+        // 🔹 Filtrar aprobados y ordenar por mejor puntuación
+        const aprobados = contenidosAPI
+          .filter((item) => item.estado === "aprobado")
+          .sort((a, b) => (b.ratingAvg || 0) - (a.ratingAvg || 0)) // orden desc
+          .slice(0, 10); // 🔹 Limitar a solo 6
 
         setContenidos(aprobados);
       } catch (error) {
@@ -39,7 +41,7 @@ export default function HomePage() {
     }
   };
 
-  // Filtrar contenidos según la búsqueda
+  // 🔹 Filtrar por búsqueda (solo dentro de los top 6)
   const filtrados = contenidos.filter((item) =>
     item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -78,9 +80,9 @@ export default function HomePage() {
       </section>
 
       {/* Tendencias con flechas */}
-      <section className="px-8 py-6 relative">
+      <section className="px-8 py-6 relative " >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Tendencias</h2>
+          <h2 className="text-2xl font-semibold">🔥 Tendencias</h2>
         </div>
 
         {/* Botones de flechas */}
@@ -108,7 +110,7 @@ export default function HomePage() {
             filtrados.map((item) => (
               <Link
                 key={item._id}
-                href={`/contenido/${item._id}`} // 👈 redirige a tu ruta dinámica
+                href={`/contenido/${item._id}`}
                 className="min-w-[180px] bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform block"
               >
                 <div className="relative w-full h-[270px]">
@@ -124,8 +126,8 @@ export default function HomePage() {
                     {item.titulo}
                   </h3>
                   <p className="text-sm text-gray-400">{item.anio}</p>
-                  <p className="text-xs text-green-400 capitalize mt-1">
-                    {item.estado}
+                  <p className="text-xs text-yellow-400 mt-1">
+                    ⭐ {item.ratingAvg ?? "N/A"}
                   </p>
                 </div>
               </Link>
