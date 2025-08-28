@@ -93,6 +93,7 @@ export default function ConfiguracionPage() {
         }
     };
 
+
     const handleDelete = async () => {
         if (!confirm("⚠️ ¿Seguro que quieres eliminar tu cuenta? Esta acción es irreversible.")) {
             return;
@@ -131,6 +132,7 @@ export default function ConfiguracionPage() {
         );
     }
 
+    
     return (
         <main className="min-h-screen bg-gray-950 text-white px-6 sm:px-10 py-10">
             <h1 className="text-3xl font-bold mb-8 text-center">
