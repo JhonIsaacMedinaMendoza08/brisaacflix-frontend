@@ -1,11 +1,29 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X } from "lucide-react"; // Iconos (ya vienen en shadcn/lucide)
+import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 
 export default function Header() {
     const [query, setQuery] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
+    const [usuario, setUsuario] = useState(null);
+
+    // 🔹 Verificar token y usuario en localStorage
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const token = localStorage.getItem("token");
+            const userData = localStorage.getItem("usuario");
+
+            if (token && userData) {
+                try {
+                    const parsedUser = JSON.parse(userData);
+                    setUsuario({ ...parsedUser, token });
+                } catch (err) {
+                    console.error("Error parseando usuario:", err);
+                }
+            }
+        }
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -28,36 +46,63 @@ export default function Header() {
                     <Link href="/series" className="hover:text-white">Series</Link>
                     <Link href="/populares" className="hover:text-white">Populares</Link>
                     <Link href="/categorias" className="hover:text-white">Categorías</Link>
+
+                    {/* 🔹 Crear contenido solo si usuario con rol:user */}
+                    {usuario?.rol === "user" && (
+                        <Link
+                            href="/crear-contenido"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Crear contenido
+                        </Link>
+                    )}
+                    {usuario?.rol === "user" && (
+                        <Link
+                            href="/crear-contenido"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Configuracion
+                        </Link>
+                    )}
+                    {usuario?.rol === "admin" && (
+                        <Link
+                            href="/gestion-usuarios"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Gestion de usuarios
+                        </Link>
+                    )}
+                    {usuario?.rol === "admin" && (
+                        <Link
+                            href="/gestion-contenido"
+                            className="hover:text-white font-semibold text-blue-400"
+                        >
+                            Gestion de contenido
+                        </Link>
+                    )}
                 </nav>
 
-                {/* Barra de búsqueda (desktop)
-                <form
-                    onSubmit={handleSearch}
-                    className="hidden md:flex items-center bg-gray-800 rounded-md overflow-hidden"
-                >
-                    <input
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Buscar película, serie..."
-                        className="px-4 py-2 w-48 sm:w-64 bg-gray-800 text-sm focus:outline-none"
-                    />
-                    <button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-semibold"
-                    >
-                        Buscar
-                    </button>
-                </form> */}
-
-                {/* Botón login (desktop) */}
+                {/* Botón login/logout (desktop) */}
                 <div className="hidden md:block">
-                    <Link
-                        href="/login"
-                        className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold"
-                    >
-                        Iniciar sesión
-                    </Link>
+                    {!usuario ? (
+                        <Link
+                            href="/login"
+                            className="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-semibold"
+                        >
+                            Iniciar sesión
+                        </Link>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem("token");
+                                localStorage.removeItem("usuario");
+                                setUsuario(null);
+                            }}
+                            className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-semibold"
+                        >
+                            Cerrar sesión
+                        </button>
+                    )}
                 </div>
 
                 {/* ICONO HAMBURGUESA (mobile) */}
@@ -77,35 +122,39 @@ export default function Header() {
                         <Link href="/series" className="hover:text-white">Series</Link>
                         <Link href="/populares" className="hover:text-white">Populares</Link>
                         <Link href="/categorias" className="hover:text-white">Categorías</Link>
+
+                        {/* 🔹 Crear contenido solo si rol:user */}
+                        {usuario?.rol === "user" && (
+                            <Link
+                                href="/crear-contenido"
+                                className="hover:text-white font-semibold text-green-400"
+                            >
+                                + Crear contenido
+                            </Link>
+                        )}
                     </nav>
 
-                    {/* Barra de búsqueda (mobile) */}
-                    <form
-                        onSubmit={handleSearch}
-                        className="flex items-center bg-gray-800 rounded-md overflow-hidden mt-4"
-                    >
-                        <input
-                            type="text"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Buscar..."
-                            className="px-4 py-2 w-full bg-gray-800 text-sm focus:outline-none"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-semibold"
-                        >
-                            Buscar
-                        </button>
-                    </form>
 
-                    {/* Botón login (mobile) */}
-                    <Link
-                        href="/login"
-                        className="block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-center text-sm font-semibold"
-                    >
-                        Iniciar sesión
-                    </Link>
+                    {/* Botón login/logout (mobile) */}
+                    {!usuario ? (
+                        <Link
+                            href="/login"
+                            className="block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-center text-sm font-semibold"
+                        >
+                            Iniciar sesión
+                        </Link>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem("token");
+                                localStorage.removeItem("usuario");
+                                setUsuario(null);
+                            }}
+                            className="block mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-center text-sm font-semibold"
+                        >
+                            Cerrar sesión
+                        </button>
+                    )}
                 </div>
             )}
         </header>

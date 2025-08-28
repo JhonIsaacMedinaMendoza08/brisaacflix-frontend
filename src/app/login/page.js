@@ -23,9 +23,9 @@ export default function LoginPage() {
 
             // redirigir según el rol
             if (res.data.usuario.rol === "user") {
-                router.push("/dashboard/admin");
+                router.push("/");
             } else {
-                router.push("/dashboard/usuario");
+                router.push("/");
             }
         } catch (err) {
             setError(err.message || "Error en inicio de sesión");
