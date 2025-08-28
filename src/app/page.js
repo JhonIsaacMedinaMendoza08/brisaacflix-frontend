@@ -1,70 +1,142 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { apiRequest } from "@/lib/api";
+import { useEffect, useState, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
+export default function HomePage() {
+  const [contenidos, setContenidos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const scrollRef = useRef(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
 
-    try {
-      const res = await apiRequest("/login", "POST", { email, contrasena });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/v1/contenido");
+        const data = await res.json();
 
-      // guardar token y usuario en localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
+        const contenidosAPI = Array.isArray(data.data) ? data.data : [];
 
-      // redirigir según el rol
-      if (res.data.usuario.rol === "admin") {
-        router.push("/dashboard/admin");
-      } else {
-        router.push("/dashboard/user");
+        // 🔹 Filtrar aprobados y ordenar por mejor puntuación
+        const aprobados = contenidosAPI
+          .filter((item) => item.estado === "aprobado")
+          .sort((a, b) => (b.ratingAvg || 0) - (a.ratingAvg || 0)) // orden desc
+          .slice(0, 10); // 🔹 Limitar a solo 6
+
+        setContenidos(aprobados);
+      } catch (error) {
+        console.error("Error cargando contenidos:", error);
       }
-    } catch (err) {
-      setError(err.message || "Error en inicio de sesión");
+    };
+    fetchData();
+  }, []);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = direction === "left" ? -clientWidth : clientWidth;
+      scrollRef.current.scrollTo({
+        left: scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
     }
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="bg-red-800 p-8 rounded-2xl shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-red text-center mb-6">Iniciar sesión</h2>
-        {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+  // 🔹 Filtrar por búsqueda (solo dentro de los top 6)
+  const filtrados = contenidos.filter((item) =>
+    item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-300">Correo</label>
+  return (
+    <main className="min-h-screen bg-gray-900 text-white">
+      {/* Hero Banner */}
+      <section className="relative h-[500px] flex items-center justify-center">
+        <Image
+          src="/fondo-inicio.webp"
+          alt="Banner"
+          fill
+          className="object-cover brightness-50"
+          priority
+        />
+        <div className="relative z-10 text-center max-w-2xl px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Bienvenido a BrisaacFlix
+          </h1>
+          <p className="text-lg text-gray-300 mb-6">
+            Millones de películas, series y contenido por descubrir. ¡Explora ya!
+          </p>
+          <div className="flex justify-center">
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
+              type="text"
+              placeholder="Buscar una película, serie..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-4 py-2 rounded-l-md text-white w-64 bg-gray-700 focus:outline-none"
             />
+            <button className="bg-blue-600 px-4 py-2 rounded-r-md hover:bg-blue-700">
+              Buscar
+            </button>
           </div>
-          <div>
-            <label className="block text-gray-300">Contraseña</label>
-            <input
-              type="password"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
-          >
-            Ingresar
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+      </section>
+
+      {/* Tendencias con flechas */}
+      <section className="px-8 py-6 relative " >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold">🔥 Tendencias</h2>
+        </div>
+
+        {/* Botones de flechas */}
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
+        >
+          ◀
+        </button>
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
+        >
+          ▶
+        </button>
+
+        {/* Contenedor scroll */}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+        >
+          {filtrados.length === 0 ? (
+            <p>No hay contenidos disponibles</p>
+          ) : (
+            filtrados.map((item) => (
+              <Link
+                key={item._id}
+                href={`/contenido/${item._id}`}
+                className="min-w-[180px] bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform block"
+              >
+                <div className="relative w-full h-[270px]">
+                  <Image
+                    src={item.poster}
+                    alt={item.titulo}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-lg font-semibold truncate">
+                    {item.titulo}
+                  </h3>
+                  <p className="text-sm text-gray-400">{item.anio}</p>
+                  <p className="text-xs text-yellow-400 mt-1">
+                    ⭐ {item.ratingAvg ?? "N/A"}
+                  </p>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
+    </main>
   );
 }
