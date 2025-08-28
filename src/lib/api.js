@@ -1,20 +1,15 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-
-export async function apiRequest(endpoint, method = "GET", body = null, token = null) {
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const res = await fetch(`${API_URL}${endpoint}`, {
+// src/lib/api.js
+export async function apiRequest(endpoint, method = "GET", body) {
+    const res = await fetch(`http://localhost:4000/api/v1/usuarios${endpoint}`, {
         method,
-        headers,
-        body: body ? JSON.stringify(body) : null,
+        headers: { "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-        throw new Error(data.error?.message || "Error en la petición");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error en la petición");
     }
 
-    return data;
+    return res.json();
 }
