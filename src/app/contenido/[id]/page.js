@@ -8,6 +8,8 @@ export default function ContenidoDetalle() {
     const [contenido, setContenido] = useState(null);
     const [resenas, setResenas] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [form, setForm] = useState({ titulo: "", comentario: "", calificacion: 5 });
 
     // 🔹 Obtener detalle del contenido
     useEffect(() => {
@@ -35,7 +37,7 @@ export default function ContenidoDetalle() {
 
                 // Filtrar solo reseñas de este contenido
                 const filtradas = data.data.filter(
-                    (r) => r.contenidoId === id // asegúrate que el campo se llame contenidoId
+                    (r) => r.contenidoId === id || r.contenidoId?.$oid === id
                 );
                 setResenas(filtradas);
             } catch (error) {
@@ -45,6 +47,50 @@ export default function ContenidoDetalle() {
 
         if (id) fetchResenas();
     }, [id]);
+
+    // 🔹 Manejar envío de reseña
+    const handleSubmitResena = async () => {
+        const token = localStorage.getItem("token");
+        const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+
+        if (!token) {
+            alert("Primero debes de iniciar sesión para registrar una reseña :)");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:4000/api/v1/resenias", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    contenidoId: id.toString(),
+                    usuarioId: usuario.id, // 👈 ahora lo enviamos desde localStorage
+                    titulo: form.titulo.trim(),
+                    comentario: form.comentario.trim(),
+                    calificacion: Number(form.calificacion),
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("❌ Error backend:", data);
+                alert(`Error creando reseña: ${JSON.stringify(data.errors || data)}`);
+                return;
+            }
+
+            // 🔄 Refrescar reseñas sin recargar toda la página
+            setResenas((prev) => [...prev, data.data]);
+            setShowModal(false);
+            setForm({ titulo: "", comentario: "", calificacion: 5 });
+        } catch (error) {
+            console.error("❌ Error frontend:", error);
+            alert("Hubo un error al crear la reseña.");
+        }
+    };
 
     if (loading) {
         return (
@@ -135,7 +181,10 @@ export default function ContenidoDetalle() {
 
                         {/* Botón para escribir reseña */}
                         <div className="mt-6 flex gap-4">
-                            <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold"
+                            >
                                 + Escribir una reseña
                             </button>
                         </div>
@@ -171,7 +220,9 @@ export default function ContenidoDetalle() {
 
                                 {/* Info extra */}
                                 <div className="flex items-center justify-between text-sm text-gray-400">
-                                    <span>Publicado: {new Date(r.createdAt).toLocaleDateString()}</span>
+                                    <span>
+                                        Publicado: {new Date(r.createdAt).toLocaleDateString()}
+                                    </span>
                                     <div className="flex gap-4">
                                         <span>👍 {r.likesUsuarios?.length || 0}</span>
                                         <span>👎 {r.dislikesUsuarios?.length || 0}</span>
@@ -182,6 +233,66 @@ export default function ContenidoDetalle() {
                     </div>
                 )}
             </section>
+
+            {/* 🔹 Modal de reseña */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg">
+                        <h2 className="text-xl font-bold mb-4">Escribir reseña</h2>
+                        <form onSubmit={handleSubmitResena} className="flex flex-col gap-4">
+                            <input
+                                type="text"
+                                placeholder="Título"
+                                value={form.titulo}
+                                onChange={(e) =>
+                                    setForm((prev) => ({ ...prev, titulo: e.target.value }))
+                                }
+                                className="px-4 py-2 bg-gray-800 rounded-md focus:outline-none"
+                                required
+                            />
+                            <textarea
+                                placeholder="Comentario"
+                                value={form.comentario}
+                                onChange={(e) =>
+                                    setForm((prev) => ({ ...prev, comentario: e.target.value }))
+                                }
+                                className="px-4 py-2 bg-gray-800 rounded-md focus:outline-none"
+                                rows={4}
+                                required
+                            />
+                            <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={form.calificacion}
+                                onChange={(e) =>
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        calificacion: e.target.value,
+                                    }))
+                                }
+                                className="px-4 py-2 bg-gray-800 rounded-md focus:outline-none"
+                                required
+                            />
+                            <div className="flex justify-end gap-4 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
+                                    className="px-4 py-2 bg-gray-700 rounded-md hover:bg-gray-600"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-700"
+                                >
+                                    Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
