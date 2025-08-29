@@ -1,19 +1,37 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function CategoriasPage() {
-    const categorias = [
-        "Acción",
-        "Aventura",
-        "Comedia",
-        "Drama",
-        "Fantasía",
-        "Terror",
-        "Romance",
-        "Sci-Fi",
-        "Animación",
-        "Documental",
-    ];
+    const [categorias, setCategorias] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const res = await fetch("http://localhost:4000/api/v1/contenido/generos");
+                const data = await res.json();
+
+                if (data.ok && Array.isArray(data.data)) {
+                    setCategorias(data.data); // viene con {id, name}
+                }
+            } catch (error) {
+                console.error("Error cargando categorías:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategorias();
+    }, []);
+
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+                <p className="animate-pulse">Cargando categorías...</p>
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-gray-950 text-white px-6 sm:px-10 py-10">
@@ -21,17 +39,23 @@ export default function CategoriasPage() {
                 🎭 Explora por <span className="text-blue-500">Categoría</span>
             </h1>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {categorias.map((cat) => (
-                    <Link
-                        key={cat}
-                        href={`/categorias/${encodeURIComponent(cat)}`}
-                        className="bg-gray-800 hover:bg-gray-700 p-6 rounded-xl text-center font-semibold transition shadow-md hover:shadow-xl"
-                    >
-                        {cat}
-                    </Link>
-                ))}
-            </div>
+            {categorias.length === 0 ? (
+                <p className="text-center text-gray-400">
+                    No hay categorías disponibles 😢
+                </p>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {categorias.map((cat) => (
+                        <Link
+                            key={cat.id}
+                            href={`/categorias/${encodeURIComponent(cat.name)}`}
+                            className="bg-gray-800 hover:bg-gray-700 p-6 rounded-xl text-center font-semibold transition shadow-md hover:shadow-xl"
+                        >
+                            {cat.name}
+                        </Link>
+                    ))}
+                </div>
+            )}
         </main>
     );
 }

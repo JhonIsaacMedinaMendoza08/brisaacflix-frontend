@@ -49,15 +49,21 @@ export default function GestionUsuariosPage() {
               <td className="p-3 text-gray-300">{u.rol}</td>
               <td className="p-3">
                 <button
-                  onClick={async () => {
-                    try {
-                      const token = localStorage.getItem("token");
-                      await apiRequest(`/usuarios/${u._id}`, "DELETE", null, token);
-                      setUsuarios((prev) => prev.filter((x) => x._id !== u._id));
-                    } catch (err) {
-                      alert(err.message);
-                    }
-                  }}
+                onClick={async () => {
+                  try {
+                    const res = await apiRequest(`/usuarios/${u._id}`, { method: "DELETE" }); // ✅ capturar respuesta
+
+                    setUsuarios((prev) => prev.filter((x) => x._id !== u._id));
+
+                    // ✅ mostrar mensaje de backend
+                    alert(
+                      `👤 Usuario "${u.nombre}" eliminado.\n` +
+                      `Se eliminaron también ${res.data.reseñasEliminadas} reseñas asociadas.`
+                    );
+                  } catch (err) {
+                    alert("Error al eliminar: " + err.message);
+                  }
+                }}
                   className="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700"
                 >
                   Eliminar

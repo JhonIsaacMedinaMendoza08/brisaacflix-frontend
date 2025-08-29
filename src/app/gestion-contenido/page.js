@@ -50,36 +50,56 @@ export default function GestionContenido() {
   }, []);
 
   // 🔹 Acciones
-  const aprobar = async (id) => {
-    try {
-      await apiRequest(`/contenido/${id}/aprobar`, { method: "PUT" });
-      setContenidos((prev) =>
-        prev.map((c) => (c._id === id ? { ...c, estado: "aprobado" } : c))
-      );
-    } catch (err) {
-      alert("Error al aprobar: " + err.message);
-    }
-  };
+const aprobar = async (id) => {
+  try {
+    const contenido = contenidos.find((c) => c._id === id);
+    await apiRequest(`/contenido/${id}/estado`, { 
+      method: "PATCH",
+      body: JSON.stringify({ estado: "aprobado" })
+    });
+    setContenidos((prev) =>
+      prev.map((c) => (c._id === id ? { ...c, estado: "aprobado" } : c))
+    );
+    // ✅ mostrar mensaje 
+    alert(` El contenido "${contenido?.titulo}" fue ACEPTADO correctamente`);
+  } catch (err) {
+    alert("Error al aprobar: " + err.message);
+  }
+};
 
-  const rechazar = async (id) => {
-    try {
-      await apiRequest(`/contenido/${id}/rechazar`, { method: "PUT" });
-      setContenidos((prev) =>
-        prev.map((c) => (c._id === id ? { ...c, estado: "rechazado" } : c))
-      );
-    } catch (err) {
-      alert("Error al rechazar: " + err.message);
-    }
-  };
+const rechazar = async (id) => {
+  try {
+    const contenido = contenidos.find((c) => c._id === id);
+    await apiRequest(`/contenido/${id}/estado`, { 
+      method: "PATCH",
+      body: JSON.stringify({ estado: "rechazado" }) 
+    });
+    setContenidos((prev) =>
+      prev.map((c) => (c._id === id ? { ...c, estado: "rechazado" } : c))
+    );
+    // ✅ mostrar mensaje 
+    alert(` El contenido "${contenido?.titulo}" fue RECHAZADO correctamente`);
+  } catch (err) {
+    alert("Error al rechazar: " + err.message);
+  }
+};
 
-  const eliminar = async (id) => {
-    try {
-      await apiRequest(`/contenido/${id}`, { method: "DELETE" });
-      setContenidos((prev) => prev.filter((c) => c._id !== id));
-    } catch (err) {
-      alert("Error al eliminar: " + err.message);
-    }
-  };
+const eliminar = async (id) => {
+  try {
+    const contenido = contenidos.find((c) => c._id === id); // 🔎 obtener titulo antes
+    const res = await apiRequest(`/contenido/${id}`, { method: "DELETE" }); // ✅ capturar respuesta
+
+    setContenidos((prev) => prev.filter((c) => c._id !== id));
+
+    // ✅ mostrar mensaje usando lo que devuelve backend
+    alert(
+      `🗑️ El contenido "${contenido?.titulo}" fue eliminado.\n` +
+      `Además, se eliminaron ${res.data.reseñasEliminadas} reseñas asociadas.`
+    );
+  } catch (err) {
+    alert("Error al eliminar: " + err.message);
+  }
+};
 
   // 🔹 Render
   if (loading) return <p className="text-white mt-24">Cargando contenido...</p>;

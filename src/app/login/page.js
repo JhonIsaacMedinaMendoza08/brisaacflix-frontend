@@ -5,36 +5,35 @@ import { useRouter } from "next/navigation";
 import { apiRequest } from "@/lib/api";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
-    const [contrasena, setContrasena] = useState("");
-    const [error, setError] = useState("");
-    const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-        try {
-            const res = await apiRequest("/usuarios/login", {
-                method: "POST",
-                body: { email, contrasena }
-            });
+    try {
+      const res = await apiRequest("/usuarios/login", {
+        method: "POST",
+        body: JSON.stringify({ email, contrasena }), // ✅ serializado
+      });
 
-            // guardar token y usuario en localStorage
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
+      // guardar token y usuario en localStorage
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
 
-            // redirigir según el rol
-          
-            if (res.data.usuario.rol === "user") {
-                router.push("/");
-            } else {
-                router.push("/");
-            }
-        } catch (err) {
-            setError(err.message || "Error en inicio de sesión");
-        }
-    };
+      // redirigir según el rol
+      if (res.data.usuario.rol === "user") {
+        router.push("/");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      setError(err.message || "Error en inicio de sesión");
+    }
+  };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900">
