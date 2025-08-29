@@ -15,17 +15,21 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const res = await apiRequest("/login", "POST", { email, contrasena });
+            const res = await apiRequest("/usuarios/login", {
+                method: "POST",
+                body: { email, contrasena }
+            });
 
             // guardar token y usuario en localStorage
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
 
             // redirigir según el rol
-            if (res.data.usuario.rol === "admin") {
-                router.push("/dashboard/admin");
+          
+            if (res.data.usuario.rol === "user") {
+                router.push("/");
             } else {
-                router.push("/dashboard/user");
+                router.push("/");
             }
         } catch (err) {
             setError(err.message || "Error en inicio de sesión");

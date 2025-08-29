@@ -1,15 +1,30 @@
-// src/lib/api.js
-export async function apiRequest(endpoint, method = "GET", body) {
-    const res = await fetch(`http://localhost:4000/api/v1/usuarios${endpoint}`, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: body ? JSON.stringify(body) : undefined,
-    });
+// /lib/api.js
+const API_URL = "http://localhost:4000/api/v1";
 
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Error en la petición");
-    }
+export async function apiRequest(endpoint, options = {}) {
+  const token = localStorage.getItem("token");
 
-    return res.json();
+  const config = {
+    method: options.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
+  };
+
+  const res = await fetch(`${API_URL}${endpoint}`, config);
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    data = null;
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Error en la petición");
+  }
+
+  return data;
 }
