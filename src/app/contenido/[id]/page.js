@@ -49,12 +49,14 @@ export default function ContenidoDetalle() {
     }, [id]);
 
     // 🔹 Manejar envío de reseña
-    const handleSubmitResena = async () => {
+    const handleSubmitResena = async (e) => {
+        e.preventDefault(); // 👈 evitar recarga del form
+
         const token = localStorage.getItem("token");
         const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
 
         if (!token) {
-            alert("Primero debes de iniciar sesión para registrar una reseña :)");
+            alert("Primero debes iniciar sesión para registrar una reseña :)");
             return;
         }
 
@@ -67,7 +69,7 @@ export default function ContenidoDetalle() {
                 },
                 body: JSON.stringify({
                     contenidoId: id.toString(),
-                    usuarioId: usuario.id, // 👈 ahora lo enviamos desde localStorage
+                    usuarioId: usuario.id,
                     titulo: form.titulo.trim(),
                     comentario: form.comentario.trim(),
                     calificacion: Number(form.calificacion),
@@ -82,15 +84,20 @@ export default function ContenidoDetalle() {
                 return;
             }
 
-            // 🔄 Refrescar reseñas sin recargar toda la página
+            // ✅ solo si el backend responde bien, actualizamos el state
             setResenas((prev) => [...prev, data.data]);
             setShowModal(false);
             setForm({ titulo: "", comentario: "", calificacion: 5 });
+            alert("✅ Reseña creada con éxito!");
+            window.location.href = "/contenido/" + id; // recargar la página para actualizar el rating
+
+
         } catch (error) {
             console.error("❌ Error frontend:", error);
-            alert("Hubo un error al crear la reseña.");
+            alert("Hubo un error inesperado al crear la reseña.");
         }
     };
+
 
     if (loading) {
         return (
@@ -204,7 +211,7 @@ export default function ContenidoDetalle() {
                     <div className="space-y-6">
                         {resenas.map((r) => (
                             <div
-                                key={r._id}
+                                key={r._id?.$oid || r._id}
                                 className="bg-gray-800 p-5 rounded-lg shadow-md hover:bg-gray-700 transition"
                             >
                                 {/* Cabecera reseña */}
@@ -239,17 +246,16 @@ export default function ContenidoDetalle() {
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                     <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg">
                         <h2 className="text-xl font-bold mb-4">Escribir reseña</h2>
-                        <form onSubmit={handleSubmitResena} className="flex flex-col gap-4">
-                            <input
-                                type="text"
-                                placeholder="Título"
-                                value={form.titulo}
-                                onChange={(e) =>
-                                    setForm((prev) => ({ ...prev, titulo: e.target.value }))
-                                }
-                                className="px-4 py-2 bg-gray-800 rounded-md focus:outline-none"
-                                required
-                            />
+                        <form onSubmit={(e) => handleSubmitResena(e)} className="flex flex-col gap-4">                            <input
+                            type="text"
+                            placeholder="Título"
+                            value={form.titulo}
+                            onChange={(e) =>
+                                setForm((prev) => ({ ...prev, titulo: e.target.value }))
+                            }
+                            className="px-4 py-2 bg-gray-800 rounded-md focus:outline-none"
+                            required
+                        />
                             <textarea
                                 placeholder="Comentario"
                                 value={form.comentario}
