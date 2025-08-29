@@ -15,7 +15,10 @@ export default function LoginPage() {
         setError("");
 
         try {
-            const res = await apiRequest("/login", "POST", { email, contrasena });
+            const res = await apiRequest("/usuarios/login", {
+                method: "POST",
+                body: { email, contrasena }
+            });
 
             // guardar token y usuario en localStorage
             localStorage.setItem("token", res.data.token);
