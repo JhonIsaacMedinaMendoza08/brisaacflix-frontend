@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+
 const API_KEY = "2383c08236b68481577236cdd05f796f";
-const API_TOKEN =
-  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzgzYzA4MjM2YjY4NDgxNTc3MjM2Y2RkMDVmNzk2ZiIsIm5iZiI6MTc1NjIwNzEzOS43NjgsInN1YiI6IjY4YWQ5ODIzY2JmNzM4YTZhOTFlNThiZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.sHVzAleMF_N1iZJ-4rFzeQb-8DVg5K0ydHidU9cfsUI";
+const API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzgzYzA4MjM2YjY4NDgxNTc3MjM2Y2RkMDVmNzk2ZiIsIm5iZiI6MTc1NjIwNzEzOS43NjgsInN1YiI6IjY4YWQ5ODIzY2JmNzM4YTZhOTFlNThiZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.sHVzAleMF_N1iZJ-4rFzeQb-8DVg5K0ydHidU9cfsUI";
+import Image from "next/image";
+
 
 export default function NuevoContenido() {
   const [tipo, setTipo] = useState("pelicula");
@@ -14,6 +16,8 @@ export default function NuevoContenido() {
   const [loading, setLoading] = useState(false);
   const [generosPeliculas, setGenerosPeliculas] = useState([]);
   const [generosSeries, setGenerosSeries] = useState([]);
+
+  // 🔹 Cargar géneros desde TMDB una sola vez
 
   useEffect(() => {
     const fetchGeneros = async () => {
@@ -37,6 +41,8 @@ export default function NuevoContenido() {
     fetchGeneros();
   }, []);
 
+  // 🔹 Buscar en TMDB
+
   const buscarEnTMDB = async () => {
     if (!query) return;
     setLoading(true);
@@ -57,6 +63,8 @@ export default function NuevoContenido() {
       setLoading(false);
     }
   };
+
+  // 🔹 Guardar en backend
 
   const guardarContenido = async (contenido) => {
     const token = localStorage.getItem("token");
