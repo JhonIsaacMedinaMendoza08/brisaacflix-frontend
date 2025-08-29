@@ -63,6 +63,12 @@ export default function Header() {
                 Crear contenido
               </Link>
               <Link
+                href="/resenias"
+                className="hover:text-white font-semibold text-blue-400"
+              >
+                Gestión de reseñas
+              </Link>
+              <Link
                 href="/configuracion"
                 className="hover:text-white font-semibold text-blue-400"
               >
@@ -144,6 +150,12 @@ export default function Header() {
                 >
                   Crear contenido
                 </Link>
+                <Link
+                href="/resenias"
+                className="hover:text-white font-semibold text-blue-400"
+              >
+                Gestión de reseñas
+              </Link>
                 <Link
                   href="/configuracion"
                   className="hover:text-white font-semibold text-blue-400"
