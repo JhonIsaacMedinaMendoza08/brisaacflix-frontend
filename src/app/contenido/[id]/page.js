@@ -98,6 +98,46 @@ export default function ContenidoDetalle() {
         }
     };
 
+    // 🔹 Votar reseña (like / dislike)
+    const handleVoto = async (resenaId, tipo) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Debes iniciar sesión para votar.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/v1/resenias/${resenaId}/votar`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ tipo }), // "like" o "dislike"
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("❌ Error en voto:", data);
+                alert("No se pudo registrar el voto.");
+                return;
+            }
+
+            // ✅ Actualizar la reseña en el estado sin recargar
+            setResenas((prev) =>
+                prev.map((r) =>
+                    (r._id === resenaId || r._id?.$oid === resenaId) ? data.data : r
+                )
+            );
+
+        } catch (error) {
+            console.error("❌ Error frontend en voto:", error);
+            alert("Error inesperado al votar.");
+        }
+    };
+
+
 
     if (loading) {
         return (
@@ -226,14 +266,19 @@ export default function ContenidoDetalle() {
                                 <p className="text-gray-300 mb-3">{r.comentario}</p>
 
                                 {/* Info extra */}
-                                <div className="flex items-center justify-between text-sm text-gray-400">
-                                    <span>
-                                        Publicado: {new Date(r.createdAt).toLocaleDateString()}
-                                    </span>
-                                    <div className="flex gap-4">
-                                        <span>👍 {r.likesUsuarios?.length || 0}</span>
-                                        <span>👎 {r.dislikesUsuarios?.length || 0}</span>
-                                    </div>
+                                <div className="flex gap-4 mt-3">
+                                    <button
+                                        onClick={() => handleVoto(r._id?.$oid || r._id, "like")}
+                                        className="flex items-center gap-1 text-green-400 hover:text-green-300"
+                                    >
+                                        👍 {r.likesUsuarios?.length || 0}
+                                    </button>
+                                    <button
+                                        onClick={() => handleVoto(r._id?.$oid || r._id, "dislike")}
+                                        className="flex items-center gap-1 text-red-400 hover:text-red-300"
+                                    >
+                                        👎 {r.dislikesUsuarios?.length || 0}
+                                    </button>
                                 </div>
                             </div>
                         ))}

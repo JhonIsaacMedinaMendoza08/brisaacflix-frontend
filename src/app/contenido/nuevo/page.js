@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 
 const API_KEY = "2383c08236b68481577236cdd05f796f";
@@ -197,6 +196,7 @@ export default function NuevoContenido() {
           </div>
         </div>
       ) : (
+
         <div className="max-w-6xl mx-auto">
           {/* Selección tipo */}
           <div className="mb-6 flex justify-center gap-6">
@@ -217,6 +217,7 @@ export default function NuevoContenido() {
           </div>
 
           {/* Buscador */}
+
           <div className="flex gap-2 mb-8 max-w-xl mx-auto">
             <input
               type="text"
