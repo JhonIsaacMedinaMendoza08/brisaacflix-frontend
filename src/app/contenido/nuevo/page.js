@@ -1,8 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 
+
 const API_KEY = "2383c08236b68481577236cdd05f796f";
 const API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzgzYzA4MjM2YjY4NDgxNTc3MjM2Y2RkMDVmNzk2ZiIsIm5iZiI6MTc1NjIwNzEzOS43NjgsInN1YiI6IjY4YWQ5ODIzY2JmNzM4YTZhOTFlNThiZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.sHVzAleMF_N1iZJ-4rFzeQb-8DVg5K0ydHidU9cfsUI";
+import Image from "next/image";
+
 
 export default function NuevoContenido() {
   const [tipo, setTipo] = useState("pelicula");
@@ -14,6 +17,7 @@ export default function NuevoContenido() {
   const [generosSeries, setGenerosSeries] = useState([]);
 
   // 🔹 Cargar géneros desde TMDB una sola vez
+
   useEffect(() => {
     const fetchGeneros = async () => {
       try {
@@ -37,6 +41,7 @@ export default function NuevoContenido() {
   }, []);
 
   // 🔹 Buscar en TMDB
+
   const buscarEnTMDB = async () => {
     if (!query) return;
     setLoading(true);
@@ -59,6 +64,7 @@ export default function NuevoContenido() {
   };
 
   // 🔹 Guardar en backend
+
   const guardarContenido = async (contenido) => {
     const token = localStorage.getItem("token");
     const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
@@ -115,32 +121,39 @@ export default function NuevoContenido() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">Agregar nuevo contenido</h1>
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-6">
+      <h1 className="text-4xl font-extrabold mb-8 text-center drop-shadow-lg">
+        🎬 Agregar Nuevo Contenido
+      </h1>
 
-      {/* Si estamos en vista previa */}
+      {/* Vista previa */}
       {preview ? (
-        <div className="flex flex-col md:flex-row gap-6">
-          <img
+        <div className="max-w-5xl mx-auto bg-gray-800/80 backdrop-blur-lg rounded-2xl p-6 shadow-xl flex flex-col md:flex-row gap-6">
+          <Image
             src={
               preview.poster_path
                 ? `https://image.tmdb.org/t/p/w400${preview.poster_path}`
-                : "/no-image.png"
+                : "/no-image.jpg"
             }
             alt={preview.title || preview.name}
-            className="rounded-lg w-full md:w-1/3"
+            width={300} 
+            height={450}  
+            onError={(e) => {
+              e.currentTarget.src = "/no-image.jpg";
+            }}
+            className="rounded-lg shadow-lg w-full md:w-1/3 object-cover"
           />
 
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold">
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-3xl font-bold">
               {preview.title || preview.name}{" "}
-              <span className="text-gray-400">
+              <span className="text-gray-400 text-lg">
                 ({(preview.release_date || preview.first_air_date || "").split("-")[0]})
               </span>
             </h2>
 
-            {/* Generos */}
-            <div className="flex gap-2 mt-2 flex-wrap">
+            {/* Géneros */}
+            <div className="flex gap-2 mt-3 flex-wrap">
               {(preview.genre_ids || []).map((id) => {
                 const g =
                   (tipo === "pelicula" ? generosPeliculas : generosSeries).find(
@@ -149,7 +162,7 @@ export default function NuevoContenido() {
                 return (
                   <span
                     key={id}
-                    className="px-3 py-1 bg-blue-800 text-sm rounded-full"
+                    className="px-3 py-1 bg-blue-700/80 text-sm rounded-full shadow-sm"
                   >
                     {g ? g.name : "Desconocido"}
                   </span>
@@ -158,9 +171,9 @@ export default function NuevoContenido() {
             </div>
 
             {/* Sinopsis */}
-            <div className="mt-4">
-              <h3 className="font-semibold">Sinopsis</h3>
-              <p className="text-gray-300">
+            <div className="mt-4 flex-1">
+              <h3 className="font-semibold text-lg mb-2">📖 Sinopsis</h3>
+              <p className="text-gray-300 leading-relaxed">
                 {preview.overview || "Sin sinopsis disponible en TMDB."}
               </p>
             </div>
@@ -169,84 +182,98 @@ export default function NuevoContenido() {
             <div className="flex gap-4 mt-6">
               <button
                 onClick={() => setPreview(null)}
-                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+                className="px-5 py-2 bg-gray-700 rounded-xl hover:bg-gray-600 transition shadow-md"
               >
                 ⬅ Volver
               </button>
               <button
                 onClick={() => guardarContenido(preview)}
-                className="px-4 py-2 bg-green-600 rounded hover:bg-green-700"
+                className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-xl transition shadow-md font-semibold"
               >
-                Solicitar contenido
+                ✅ Solicitar contenido
               </button>
             </div>
           </div>
         </div>
       ) : (
-        <>
+
+        <div className="max-w-6xl mx-auto">
           {/* Selección tipo */}
-          <div className="mb-4 flex gap-4">
+          <div className="mb-6 flex justify-center gap-6">
             <button
               onClick={() => setTipo("pelicula")}
-              className={`px-4 py-2 rounded ${tipo === "pelicula" ? "bg-blue-600" : "bg-gray-700"}`}
+              className={`px-6 py-2 rounded-xl font-semibold shadow-md transition ${tipo === "pelicula" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
+                }`}
             >
-              Película
+              🎥 Película
             </button>
             <button
               onClick={() => setTipo("serie")}
-              className={`px-4 py-2 rounded ${tipo === "serie" ? "bg-blue-600" : "bg-gray-700"}`}
+              className={`px-6 py-2 rounded-xl font-semibold shadow-md transition ${tipo === "serie" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
+                }`}
             >
-              Serie
+              📺 Serie
             </button>
           </div>
 
           {/* Buscador */}
-          <div className="flex gap-2 mb-6">
+
+          <div className="flex gap-2 mb-8 max-w-xl mx-auto">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Buscar ${tipo}...`}
-              className="px-4 py-2 bg-gray-800 rounded w-full"
+              placeholder={`🔎 Buscar ${tipo}...`}
+              className="px-4 py-2 bg-gray-800/90 rounded-xl w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               onClick={buscarEnTMDB}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-xl transition shadow-md font-semibold"
             >
               Buscar
             </button>
           </div>
 
           {/* Resultados */}
-          {loading && <p>Buscando...</p>}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {loading && <p className="text-center text-gray-400">Buscando...</p>}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {resultados.map((r) => (
-              <div key={r.id} className="p-2 rounded-lg bg-gray-800">
-                <img
+              <div
+                key={r.id}
+                className="bg-gray-800/80 rounded-xl overflow-hidden shadow-lg hover:scale-105 transition transform"
+              >
+                <Image
                   src={
                     r.poster_path
                       ? `https://image.tmdb.org/t/p/w300${r.poster_path}`
-                      : "/no-image.png"
+                      : "/no-image.jpg"
                   }
                   alt={r.title || r.name}
-                  className="rounded"
+                  width={400}   
+                  height={600}  
+                  onError={(e) => {
+                    e.currentTarget.src = "/no-image.jpg";
+                  }}
+                  className="w-full h-72 object-cover"
                 />
-                <p className="mt-2 font-semibold text-sm">
-                  {r.title || r.name}{" "}
-                  <span className="text-gray-400">
-                    ({(r.release_date || r.first_air_date || "").split("-")[0]})
-                  </span>
-                </p>
-                <button
-                  onClick={() => setPreview(r)}
-                  className="mt-2 w-full px-3 py-1 bg-blue-600 rounded hover:bg-blue-700"
-                >
-                  Previsualizar
-                </button>
+                <div className="p-3">
+                  <p className="font-semibold text-sm truncate">
+                    {r.title || r.name}
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    {(r.release_date || r.first_air_date || "").split("-")[0]}
+                  </p>
+                  <button
+                    onClick={() => setPreview(r)}
+                    className="mt-3 w-full px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition shadow"
+                  >
+                    👀 Previsualizar
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
     </main>
   );
