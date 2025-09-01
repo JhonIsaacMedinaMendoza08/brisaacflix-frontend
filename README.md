@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎥 BrisaacFlix - Frontend  
 
-## Getting Started
+BrisaacFlix es una aplicación **web full-stack** donde los usuarios pueden explorar, reseñar y rankear películas, series y animes geek.  
 
-First, run the development server:
+Este repositorio corresponde al **Frontend**, desarrollado con **React + Next.js + TailwindCSS**, que consume la API del backend para mostrar la información y permitir la interacción de los usuarios.  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 Objetivo  
+
+Construir una interfaz moderna, rápida y responsiva que permita a los usuarios:  
+
+- Registrarse e iniciar sesión.  
+- Explorar películas y series por categorías, popularidad o búsqueda.  
+- Crear, editar y eliminar reseñas.  
+- Dar like/dislike a reseñas de otros usuarios.  
+- Los administradores pueden aprobar/rechazar contenidos desde un panel de administración.  
+
+---
+
+## 🛠️ Tecnologías utilizadas  
+
+### Frontend  
+- **React 18 + Next.js 14**  
+- **TailwindCSS** → estilos modernos y responsivos  
+- **shadcn/ui + lucide-react** → componentes de UI reutilizables  
+- **Framer Motion** → animaciones fluidas  
+- **Recharts** → gráficas interactivas (ranking, estadísticas)  
+- **JWT** (manejado vía `localStorage`) para sesiones  
+- **Fetch API** encapsulada en `lib/api.js` para consumo de endpoints  
+
+---
+
+## 📂 Estructura del proyecto (frontend)  
+
+```text
+/frontend
+│── /src
+│   ├── /app              # Páginas principales (Next.js App Router)
+│   │   ├── /auth         # Login y registro
+│   │   ├── /categorias   # Listado y detalle por categoría
+│   │   ├── /contenido    # Detalle de película/serie
+│   │   ├── /gestion      # Panel de administración
+│   │   └── layout.js     # Layout global
+│   │
+│   ├── /components       # Componentes UI reutilizables
+│   ├── /lib              # api.js y utilidades
+│   ├── /styles           # Estilos globales y Tailwind
+│   └── /hooks            # Hooks personalizados
+│
+│── public/               # Assets estáticos (logos, íconos)
+│── package.json
+│── tailwind.config.js
+│── next.config.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🔐 Autenticación y roles  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **JWT almacenado en localStorage** para mantener la sesión.  
+- **Protección de rutas**:  
+  - 👤 **usuario** → puede explorar contenido, reseñar, votar.  
+  - 🛡️ **admin** → acceso a panel de gestión de categorías y aprobación de contenido.  
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🎬 Funcionalidades principales  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📱 Usuarios  
+- Login / Registro con validaciones y feedback visual.  
+- Persistencia de sesión con JWT.  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🎥 Contenido  
+- Explorar contenido aprobado en la plataforma.  
+- Filtrar por categoría, popularidad o búsqueda por título.  
+- Vista detallada con sinopsis, póster y reseñas.  
 
-## Deploy on Vercel
+### ✍️ Reseñas  
+- Crear, editar y eliminar reseñas.  
+- Like / Dislike en reseñas de otros usuarios.  
+- Notificaciones visuales con toasts tras cada acción.  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 🛠️ Administración (solo admin)  
+- Aprobar o rechazar solicitudes de películas/series.  
+- Eliminar contenido.  
+- Interfaz responsiva para usar desde desktop o móvil.  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ⚡ Instalación y uso (local)  
+
+### Requisitos  
+- Node.js >= 18  
+- Tener el backend corriendo en `http://localhost:4000`  
+
+### Pasos  
+
+```bash
+# Clonar repositorio
+git clone https://github.com/JhonIsaacMedinaMendoza08/brisaacflix-frontend.git
+cd brisaacflix-frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar en modo desarrollo
+npm run dev
+```
+
+Por defecto se sirve en: `http://localhost:3000`  
+
+---
+
+## 🌐 Deploy  
+
+El frontend está desplegado en **Vercel**:  
+
+👉 [BrisaacFlix Frontend (Deploy)](https://gestor-de-reservas-de-canchas-front.vercel.app/)  
+
+---
+
+## 🔗 Repositorios relacionados  
+
+- **Backend**: [BrisaacFlix Backend](https://github.com/JhonIsaacMedinaMendoza08/BrisaacFlix-backend)  
+
+---
+
+## ✨ Créditos  
+
+- Equipo: Isaac Medina & Brian Suárez  
+- Inspiración/recursos: **TMDB API** para metadata de contenidos  

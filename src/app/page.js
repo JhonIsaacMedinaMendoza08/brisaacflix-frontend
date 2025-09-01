@@ -5,10 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function HomePage() {
-  const [contenidos, setContenidos] = useState([]);
+  const [contenidos, setContenidos] = useState([]);   // 🔹 todos los datos de la API
+  const [tendencias, setTendencias] = useState([]);   // 🔹 solo top 10
   const [searchTerm, setSearchTerm] = useState("");
   const scrollRef = useRef(null);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,13 +18,16 @@ export default function HomePage() {
 
         const contenidosAPI = Array.isArray(data.data) ? data.data : [];
 
-        // 🔹 Filtrar aprobados y ordenar por mejor puntuación
+        // 🔹 Guardar todos los contenidos
+        setContenidos(contenidosAPI);
+
+        // 🔹 Sacar solo los aprobados y ordenar por rating (top 10 tendencias)
         const aprobados = contenidosAPI
           .filter((item) => item.estado === "aprobado")
-          .sort((a, b) => (b.ratingAvg || 0) - (a.ratingAvg || 0)) // orden desc
-          .slice(0, 10); // 🔹 Limitar a solo 6
+          .sort((a, b) => (b.ratingAvg || 0) - (a.ratingAvg || 0))
+          .slice(0, 10);
 
-        setContenidos(aprobados);
+        setTendencias(aprobados);
       } catch (error) {
         console.error("Error cargando contenidos:", error);
       }
@@ -43,10 +46,12 @@ export default function HomePage() {
     }
   };
 
-  // 🔹 Filtrar por búsqueda (solo dentro de los top 6)
-  const filtrados = contenidos.filter((item) =>
-    item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // 🔹 Si hay búsqueda → filtrar sobre todos los contenidos
+  const resultados = searchTerm
+    ? contenidos.filter((item) =>
+        item.titulo.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : tendencias; // si no hay búsqueda → mostrar top 10
 
   return (
     <main className="min-h-screen bg-gray-900 text-white">
@@ -81,35 +86,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Tendencias con flechas */}
-      <section className="px-8 py-6 relative " >
+      {/* Tendencias o Resultados */}
+      <section className="px-8 py-6 relative">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">🔥 Tendencias</h2>
+          <h2 className="text-2xl font-semibold">
+            {searchTerm ? "🔎 Resultados" : "🔥 Tendencias"}
+          </h2>
         </div>
 
-        {/* Botones de flechas */}
-        <button
-          onClick={() => scroll("left")}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
-        >
-          ◀
-        </button>
-        <button
-          onClick={() => scroll("right")}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
-        >
-          ▶
-        </button>
+        {/* Botones de flechas solo si es tendencias */}
+        {!searchTerm && (
+          <>
+            <button
+              onClick={() => scroll("left")}
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
+            >
+              ◀
+            </button>
+            <button
+              onClick={() => scroll("right")}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black/60 p-2 rounded-full hover:bg-black/80 z-10"
+            >
+              ▶
+            </button>
+          </>
+        )}
 
         {/* Contenedor scroll */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+          className={`flex gap-4 ${searchTerm ? "flex-wrap justify-center" : "overflow-x-auto scrollbar-hide scroll-smooth"}`}
         >
-          {filtrados.length === 0 ? (
+          {resultados.length === 0 ? (
             <p>No hay contenidos disponibles</p>
           ) : (
-            filtrados.map((item) => (
+            resultados.map((item) => (
               <Link
                 key={item._id}
                 href={`/contenido/${item._id}`}

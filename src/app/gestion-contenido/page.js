@@ -49,35 +49,51 @@ export default function GestionContenido() {
     fetchContenidos();
   }, []);
 
-  // 🔹 Acciones
   const aprobar = async (id) => {
     try {
-      await apiRequest(`/contenido/${id}/aprobar`, { method: "PUT" });
+      const contenido = contenidos.find((c) => c._id === id);
+
+      const res = await apiRequest(`/contenido/${id}/estado`, {
+        method: "PATCH",
+        body: { estado: "aprobado" },
+      });
+
       setContenidos((prev) =>
-        prev.map((c) => (c._id === id ? { ...c, estado: "aprobado" } : c))
+        prev.map((c) =>
+          c._id === id
+            ? { ...c, estado: res.data?.estado || "aprobado" } // fallback
+            : c
+        )
       );
+
+      alert(`✅ El contenido "${contenido?.titulo}" fue APROBADO`);
     } catch (err) {
+      console.error("Error al aprobar:", err);
       alert("Error al aprobar: " + err.message);
     }
   };
 
   const rechazar = async (id) => {
     try {
-      await apiRequest(`/contenido/${id}/rechazar`, { method: "PUT" });
-      setContenidos((prev) =>
-        prev.map((c) => (c._id === id ? { ...c, estado: "rechazado" } : c))
-      );
-    } catch (err) {
-      alert("Error al rechazar: " + err.message);
-    }
-  };
+      const contenido = contenidos.find((c) => c._id === id);
 
-  const eliminar = async (id) => {
-    try {
-      await apiRequest(`/contenido/${id}`, { method: "DELETE" });
-      setContenidos((prev) => prev.filter((c) => c._id !== id));
+      const res = await apiRequest(`/contenido/${id}/estado`, {
+        method: "PATCH",
+        body: { estado: "rechazado" }, 
+      });
+
+      setContenidos((prev) =>
+        prev.map((c) =>
+          c._id === id
+            ? { ...c, estado: res.data?.estado || "rechazado" }
+            : c
+        )
+      );
+
+      alert(`❌ El contenido "${contenido?.titulo}" fue RECHAZADO`);
     } catch (err) {
-      alert("Error al eliminar: " + err.message);
+      console.error("Error al rechazar:", err);
+      alert("Error al rechazar: " + err.message);
     }
   };
 
